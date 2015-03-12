@@ -52,9 +52,10 @@ public:
 		fill(taken.begin(), taken.end(), 0);
 
 		init();
-		fill_missing();
-
-		if ( check() ) cerr << *this << endl;
+		if ( fill_missing() ) {
+			assert( check() );
+			cerr << *this << endl;
+		}
 	}
 
 	bool check ( ) {
@@ -214,7 +215,7 @@ public:
 		assert(taken[e] == 0);
 		taken[e] = c;
 		lower[c - 'a'] = e;  // assume they are contiguous
-		
+
 		// insert also the complent of e
 		bitset<X> bits(e);
 		conf_t complement = bits.flip().to_ulong();
@@ -237,7 +238,7 @@ public:
 			conf_t candidate = 0;
 			for ( size_t k = 0; k < K; ++k) candidate |= (1 << random() % X);
 
-			if ( taken[candidate] == 0 ) {
+			if ( taken[candidate] == 0 && candidate != 3 ) {
 				insert_with_complement(candidate, current);
 				current++;
 			}
@@ -263,14 +264,14 @@ public:
 };
 
 template<>
-const powerset<> tape<7,25>::powers = powerset<>();
+const powerset<> tape<7, 26>::powers = powerset<>();
 
 
 int main () {
 	srandom(std::random_device()());
 
 	while(true) {
-		tape<7, 25> t;
+		tape<7, 26> t;
 	}
 
 	return 0;
