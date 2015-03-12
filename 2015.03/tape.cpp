@@ -141,6 +141,9 @@ public:
 		// search for representations of letter
 		for ( size_t i = 0; i < M; ++i ) {
 			if ( taken[i] == letter ) {
+				// it is sufficient to solve the problem for the configurations with at least 2 set bits
+				if ( count(i) < 2 ) continue;
+
 				representations[rsize++] = i;
 				if ( debug ) cout << "  Represented with " << bitset<X>(i) << (lower[letter - 'a'] == i ? " #" : "") << endl;
 			}
@@ -194,7 +197,7 @@ public:
 	}
 
 	bool fill_missing() {
-		for ( size_t i = 0; i < N; ) {
+		for ( size_t i = N - 1; i > 0; ) {
 			conf_t ecurrent = lower[i];
 			char current = 'a' + i;
 
@@ -204,7 +207,7 @@ public:
 				if ( debug ) cerr << "Stopped at " << i+1 << " letters." << endl;
 				return false;
 			}
-			if ( next == 0 ) ++i ;
+			if ( next == 0 ) --i ;
 			if ( next != 0 ) taken[next] = current;
 		}
 
@@ -238,7 +241,7 @@ public:
 			conf_t candidate = 0;
 			for ( size_t k = 0; k < K; ++k) candidate |= (1 << random() % X);
 
-			if ( taken[candidate] == 0 && candidate != 3 ) {
+			if ( taken[candidate] == 0 ) {
 				insert_with_complement(candidate, current);
 				current++;
 			}
