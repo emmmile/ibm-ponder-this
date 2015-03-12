@@ -32,6 +32,15 @@ public:
 	const vector<size_t>& operator [] ( size_t index ) const {
 		return order[index];
 	}
+
+	powerset inverse ( ) const {
+		powerset newone = *this;
+
+		for ( size_t i = 0; i < Y; ++i )
+			reverse(newone.order[i].begin(), newone.order[i].end());
+
+		return newone;
+	}
 };
 
 #endif

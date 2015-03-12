@@ -13,15 +13,14 @@
 #include <powerset.h>
 using namespace std;
 
-size_t level = 0;
+static const size_t debug = 0;
 
 
 /* X is the number of bits
  * N is the number of symbols
  * K is number of bits out of X to use initially
  */
-
-template<size_t X, size_t N = 26 size_t K = 2>
+template<size_t X, size_t N = 26, size_t K = 2>
 class tape {
 	typedef unsigned short int conf_t;
 
@@ -53,35 +52,25 @@ public:
 		fill(taken.begin(), taken.end(), 0);
 
 		init();
-		if ( generate_greather() ) {
-			//assert(check());
-			cerr << *this << endl;
-			getchar();
-		}
+		fill_missing();
+
+		if ( check() ) cerr << *this << endl;
 	}
 
 	bool check ( ) {
-		bitset<N> letters;
-
-		// I must find an entry that is smaller than any other, for every letter
 		for ( conf_t ientry : lower ) {
 			bitset<N> current;
 
 			assert(taken[ientry] != 0);
-			for ( size_t jentry = 0; jentry < M; ++jentry ) {
-				if ( taken[jentry] != 0 && greater(jentry, ientry) ) {
-					//cout << "It's possible to write " << taken[jentry] << " over " << taken[ientry] << endl;
+			for ( size_t jentry = 0; jentry < M; ++jentry )
+				if ( taken[jentry] != 0 && greater(jentry, ientry) )
 					current.set(taken[jentry] - 'a');
-				}
-			}
 
-			if( current.count() == different()) {
-				letters.set(taken[ientry] - 'a');
-			}
+			if( current.count() != different() )
+				return false;
 		}
 		
-		//cout << letters << endl;
-		return letters.count() == different();
+		return true;
 	}
 
 	// loop over the encodings that are greater than current
@@ -142,19 +131,17 @@ public:
 		assert(letter >= 'a');
 		assert(letter <= char('a' + N));
 
-		//for ( auto it = lower.begin(); it != lower.end(); it++ ) cout << bitset<X>(*it) << " is the lower representation of letter " << char('a' + (it - lower.begin())) << endl;
-
 		size_t rsize = 0;
 		size_t isize = 0;
 		conf_t representations [M];
 		conf_t incomplete 	   [M];
-		if ( level ) cout << "Letter " << letter << ":" << endl;
+		if ( debug ) cout << "Letter " << letter << ":" << endl;
 
 		// search for representations of letter
 		for ( size_t i = 0; i < M; ++i ) {
 			if ( taken[i] == letter ) {
 				representations[rsize++] = i;
-				if ( level ) cout << "  Represented with " << bitset<X>(i) << (lower[letter - 'a'] == i ? " #" : "") << endl;
+				if ( debug ) cout << "  Represented with " << bitset<X>(i) << (lower[letter - 'a'] == i ? " #" : "") << endl;
 			}
 		}
 
@@ -166,7 +153,7 @@ public:
 			}
 
 			if ( ! ok ) {
-				if ( level ) cout << "  Cannot be written over " << char('a' + i) << " " << bitset<X>(lower[i]) << endl;
+				if ( debug ) cout << "  Cannot be written over " << char('a' + i) << " " << bitset<X>(lower[i]) << endl;
 				incomplete[isize++] = lower[i];
 			}
 		}
@@ -177,48 +164,47 @@ public:
 
 	conf_t greedy_greater( conf_t* beg, conf_t* end ) {
 		if ( beg == end ) return 0;
+
+		// to better explore the search space
 		random_shuffle(beg, end);
+
 		size_t elements = end - beg;
 		if ( elements >= 10 ) elements = 9; // hard limit to the first 2^9 configurations
 
 		for ( size_t i = 0; i < (1u << elements) - 1; ++i ) {
-			auto dio = powers[elements];
 			size_t chosen = powers[elements][i];
-			//cout << "    Considering " << bitset<X>(chosen) << endl;
 
 			conf_t c = 0;
+			// compute the | of the selected configurations
 			for ( conf_t* i = beg; i != beg + elements; ++i )
 				if ( bitset<X>(chosen)[i-beg] ) c |= *i;
 		
+			// search an empty configuration greater than c
 			conf_t candidate = find_greater(c);
 			if ( candidate == M ) {
-				if ( level ) cout << "    All greater configurations of " << bitset<X>(c) << " are taken." << endl;
+				if ( debug ) cout << "    All greater configurations of " << bitset<X>(c) << " are taken." << endl;
 			} else {
-				if ( level ) cout << "    Found configuration greater than " << bitset<X>(c) << " (" << bitset<X>(candidate) << ")" << endl;
+				if ( debug ) cout << "    Found configuration greater than " << bitset<X>(c) << " (" << bitset<X>(candidate) << ")" << endl;
 				return candidate;
 			}
 		}
 
-		return find_greater_inverse(0);
+		return find_greater(0);
 	}
 
-	bool generate_greather() {
-		size_t aux [N];
-		for ( size_t i = 0; i < N; ++i ) aux[i] = i;
-		random_shuffle(aux, aux + N);
-
+	bool fill_missing() {
 		for ( size_t i = 0; i < N; ) {
 			conf_t ecurrent = lower[i];
 			char current = 'a' + i;
-			//cout << bitset<X>(ecurrent) << " is " << current <<  endl;
-			conf_t hint = find_upper(current);
 
-			if ( hint == M ) {
-				if ( level ) cerr << "Stopped at " << i+1 << " letters." << endl;
+			conf_t next = find_upper(current);
+
+			if ( next == M ) {
+				if ( debug ) cerr << "Stopped at " << i+1 << " letters." << endl;
 				return false;
 			}
-			if ( hint == 0 ) ++i ;
-			if ( hint != 0 ) taken[hint] = current;
+			if ( next == 0 ) ++i ;
+			if ( next != 0 ) taken[next] = current;
 		}
 
 		return true;
@@ -227,10 +213,12 @@ public:
 	void insert_with_complement( conf_t e, char c) {
 		assert(taken[e] == 0);
 		taken[e] = c;
+		lower[c - 'a'] = e;  // assume they are contiguous
+		
+		// insert also the complent of e
 		bitset<X> bits(e);
 		conf_t complement = bits.flip().to_ulong();
 		taken[complement] = c;
-		lower[c - 'a'] = e;  // assume they are contiguous
 	}
 
 	bool init() {
@@ -254,8 +242,6 @@ public:
 				current++;
 			}
 		}
-
-		//cout << *this << endl;
 
 		return true;
 	}
@@ -282,7 +268,6 @@ const powerset<> tape<7,25>::powers = powerset<>();
 
 int main () {
 	srandom(std::random_device()());
-	//tape<7>::print_graph();
 
 	while(true) {
 		tape<7, 25> t;

@@ -9,4 +9,4 @@ include_directories ("${PROJECT_SOURCE_DIR}")
 
 add_executable(tape tape.cpp)
 
-target_link_libraries(tape boost_program_options boost_log boost_system)
+target_link_libraries(tape)
