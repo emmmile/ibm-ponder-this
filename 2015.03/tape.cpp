@@ -16,12 +16,16 @@ using namespace std;
 size_t level = 0;
 
 
+/* X is the number of bits
+ * N is the number of symbols
+ * K is number of bits out of X to use initially
+ */
 
-
-template<size_t X, size_t N = 26, size_t M = 1 << X, size_t K = 2>
+template<size_t X, size_t N = 26 size_t K = 2>
 class tape {
 	typedef unsigned short int conf_t;
 
+	static const size_t M = 1 << X;
 	static const powerset<> powers;
 
 	inline bool greater ( const conf_t& a, const conf_t& b ) const {
