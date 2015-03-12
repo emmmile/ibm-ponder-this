@@ -251,7 +251,7 @@ public:
 	}
 
 	friend ostream& operator<< ( ostream& out, tape& p ) {
-		for ( size_t k = 0; k < M; ++k ) {
+		/*for ( size_t k = 0; k < M; ++k ) {
 			if ( p.taken[k] == 0 ) {
 				out << bitset<X>(k) << " " << "*" << endl;
 			} else {
@@ -261,7 +261,11 @@ public:
 		}
 
 		out << "used:  " << p.used() << endl;
-		out << "valid: " << p.check() << endl;
+		out << "valid: " << p.check() << endl;*/
+		for ( size_t k = 0; k < M; ++k )
+			out << (p.taken[k] == 0 ? '*' : p.taken[k]);
+
+		out << " " << p.check();
 		return out;
 	}
 };
