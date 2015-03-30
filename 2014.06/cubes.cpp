@@ -5,7 +5,7 @@
 #include <algorithm>    // std::random_shuffle
 using namespace std;
 
-/*int source [31];
+int source [31];
 
 
 template<size_t N, size_t T>
@@ -37,50 +37,11 @@ struct cube {
 		
 		return stream;
 	}
-
-    static void combinations ( ) {
-        int c [T+3];
-        int j;
-        int x;
-
-        for ( int i = 1; i <= T; ++i ) c[i] = i - 1;
-        c[T+1] = N;
-        c[T+2] = 0;
-        j = T;
-
-        while (true) {
-            cube visit(c + 1, c + 1 + T);
-            cout << visit << endl;
-
-            if ( j > 0 ) {
-                x = j;
-            } else {
-                if ( c[1] + 1 < c[2] ) {
-                    c[1] = c[1] + 1;
-                    continue;
-                } else {
-                    j = 2;
-                }
-
-                while ( true ) {
-                    c[j-1] = j-2;
-                    x = c[j] + 1;
-                    if ( x == c[j+1] ) j++;
-                    else break;
-                }
-
-                if ( j > T ) break;
-            }
-
-            c[j] = x;
-            j = j -1;
-        }
-    }
-};*/
+};
 
 
 
-template<size_t N, size_t T>
+/*template<size_t N, size_t T>
 class combinations {
     typedef bitset<N> C;
 public:
@@ -170,7 +131,7 @@ public:
 };
 
 
-/*int main ( ) {
+int main ( ) {
     //cube<31,5>::combinations();
     typedef typename cubes<31,5>::cube_iterator iter;
 
@@ -182,7 +143,7 @@ public:
     }
 
     cubes<31,4>::fill();
-}
+}*/
 
 typedef cube<31,5> fastcube;
 
@@ -222,11 +183,11 @@ int main ( ) {
 		source[i] = i + 1;
 
 	compute();
-}*/
+}
 
 
 
-int main ( ) {
+/*int main ( ) {
     combinations<31,5>::iterator it = combinations<31,5>::begin(); 
     while ( it != combinations<31,5>::end() ) {
         cout << *it << endl;
@@ -234,4 +195,4 @@ int main ( ) {
     }
 
     return 0;
-}
+}*/

@@ -8,12 +8,9 @@
 #include <algorithm>    // std::random_shuffle
 using namespace std;
 
-int q[] = { 1, 1, 2, 3, 4, 5, 7, 8, 10, 12, 14, 16, 19, 21, 24, 27, 30, 
-    33, 37, 40, 44, 48, 52, 56, 61, 65, 70, 75, 80, 85, 91, 96, 102, 108, 
-    114, 120, 127, 133, 140, 147, 154, 161, 169, 176, 184, 192, 200, 208, 
-    217, 225, 234, 243, 252, 261, 271, 280, 290, 300, 310, 320, 331, 341 };
 
-
+// tremendously complicated in order to have a small and fast representation
+// it's not necessary to be soo complicated but hell, I do this for exercise
 class configuration {
 public:
     typedef uint32_t configuration_type;
@@ -317,19 +314,24 @@ public:
             }
         }
 
-        cout << "Out of the " << total << " possible starting moves, this are the winning ones: " << endl;
+        cout << "Out of the " << total << " possible starting moves, this are the winning ones (" << win.size() << " in total):" << endl;
 
         for( const configuration& c : win ) {
             cout << c << endl;
-            if ( configuration::move(start, c) )
-                cout << c << endl;
+            //if ( configuration::move(start, c) )
+            //    cout << c << endl;
         }
 
         cout << "(the ones that, for any possible reply, leads to loosing configurations for the other player)" << endl;
         assert( configurations.size() == win.size() + loose.size() );
 
 
-        cout << "Total winning configurations " << win.size() << endl;
+        cout << "These are reachable from the start: " << endl;
+
+        for( const configuration& c : win ) {
+            if ( configuration::move(start, c) )
+               cout << c << endl;
+        }
     }
 };
 
@@ -363,7 +365,7 @@ int main ( ) {
     win.results();
     win = winning();
     win.check(start);
-    win.results();
+    //win.results();
 
 
     /* speed test

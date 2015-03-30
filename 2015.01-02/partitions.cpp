@@ -16,6 +16,7 @@ struct integer_partition {
 	typedef array<int, M> part_sentinel_t;
 	vector<part_t> parts;
 
+	// taken from knuth
 	integer_partition ( ) {
 		part_sentinel_t a;
 		static_assert(M >= 1, "number of parts must be greater than 0");
