@@ -10,7 +10,8 @@
 #include "vect.hpp"
 using namespace std;
 
-#define X 13
+#define X 7
+#define P 165
 
 template<size_t N>
 struct cube {
@@ -21,7 +22,9 @@ struct cube {
     static const int D = N / 2;
     static const set<vect> hooks;
     static const set<vect> directions;
-        
+
+    typedef array<int, N * N * N> paths;
+    
     static set<vect> generate_surface () {
         set<vect> surface;
         int s = D + 1;
@@ -39,7 +42,7 @@ struct cube {
 
     // for any index in [0, N * N * N) return the number of unsolved paths
     // if the array = 0 the solution is valid, i.e. captain hook is losing
-    array<int, N * N * N> check ( ) {
+    paths check ( ) {
         array<int, N * N * N> unsolved;
         fill(unsolved.begin(), unsolved.end(), 0);
 
@@ -56,7 +59,7 @@ struct cube {
     // starts from a hook and walks in a given direction, inside the cube
     // if it founds a wendy, exits
     // otherwise mark the path as unsolved
-    void check_path( const vect& hook, const vect& direction, array<int, N * N * N>& unsolved ) {
+    void check_path( const vect& hook, const vect& direction, paths& unsolved ) {
         vect current = hook;
         while( inside(current + direction) ) {
             current = current + direction;
@@ -87,14 +90,45 @@ struct cube {
     }
 
     cube ( ) {
-        // TODO until not solved
-        check();
+        typename paths::iterator maximum;
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_real_distribution<> dis;
+
+        do {
+            paths unsolved = check();
+            maximum = max_element(unsolved.begin(), unsolved.end());
+            if ( *maximum ) {
+                // select at random one of these cells
+                int count = 1;
+                size_t selected;
+                for ( size_t i = 0; i < unsolved.size(); ++i ) {
+                    if ( unsolved[i] == *maximum && dis(gen) < 1.0 / (double) count ) {
+                        count++;
+                        selected = i;
+                    }
+                }
+
+                cells[selected] = true;
+            }
+        } while ( *maximum );
+    }
+
+    size_t wendys ( ) {
+        return cells.count();
+    }
+
+    size_t peters ( ) {
+        return cells.size() - wendys();
     }
 
 	friend ostream& operator << ( ostream& stream, cube& c ) {
         for ( unsigned int i = 0; i < N * N * N; ++i )
             stream << (c.cells[i] ? "W" : "P");
-		
+
+		stream << endl;
+        stream << c.wendys() << " wendys" << endl;
+        stream << c.peters() << " peter pans";
 		return stream;
 	}
 };
@@ -106,7 +140,16 @@ template<>
 const set<vect> cube<X>::directions = cube<1>::generate_surface();
 
 int main ( ) {
-	cube<X> c;
+
+    cube<X> c;
+
+    while ( c.peters() < P ) {
+        c = cube<X>();
+    }
 
     cout << c << endl;
 }
+
+
+// WWWWWWWWWPPWWWWWWPPWWWWPPWWWWWWWPPWWWPWWWWWWWWWWWWWWWWWWPPWPPPPWPPPPPPPPPWWPWPPPPPPWPPPPWPWWWWWPWWWWWWWWWWPPPPPPPPPPPWWWWPPPPPPPPPPWWWPPPPPPWWWPPWWWWWWWWWPPPPPPWWPWPPPPPPPPPPWPPPPPPWWPPPPPPWWWWPWWWWWWPPWPPPPPWWWPPPWPPPPPPPPWWWPPPPWPPPWPWWWWWWPWWWWPWPPWWPPPPPWWPPPPPWWPWPPPWWPPPWPWWPPPPPWWWWWWWWWWWWWWWWWWWWWWWPWWWWWWPWPPPWWPWPWPWWPWPPPWWWWWWWW
+// WWWWWWWWPPPWPWWPWPWPWWPPPWPWWWWWWPWWWWWWWWWWWWWWWWWWWWWWWPPPPPWWPWPPPWWPPPWPWWPPPPPWWPPPPPWWPPPPWWWWPWWWWWWPWPPPWPPPPWPWPPPPPPPPPPPPWWWPPPPPWPWWPWWWWPPWWWPPPPPPWWPPPPWPWPPPPPPPPPPWPWWPPPPPPWPWWWWWWWPPWPWPPPPPPWWPPPPPPWPPPPPWPPPPPPWWWPPPPWWWWWWWWWWPPWPWPPWPPPWWPPPPPPWWPPPWWWPPWPPPWPPPPPPWPPWWWWWWWWWWWWWWWWWWWWPWWWWWPWWPWWWPWWPWWWWWWPWWWWWWWWW
