@@ -2,6 +2,9 @@
 #include <ostream>
 using namespace std;
 
+
+// simple stack vector implementation
+
 typedef array<int, 3> vect;
 
 vect operator + ( const vect& a, const vect& b ) {
@@ -20,4 +23,3 @@ ostream& operator << ( ostream& stream, vect& c ) {
     for ( auto i : c ) stream << i << " ";
     return stream;
 }
-
