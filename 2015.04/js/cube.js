@@ -121,6 +121,7 @@ function onMouseUp(event) {
 
 function onWindowResize() {
   camera.lookAt(new THREE.Vector3(0,0,0));
+  ratio = container.clientWidth / 7;
 
 
   var w = container.clientWidth; //window.innerWidth;
