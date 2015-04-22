@@ -32,12 +32,12 @@ function init() {
   camera.position.z = 10;
 
   renderer.setSize( w, h );
-  document.body.appendChild( renderer.domElement );
+  document.getElementById("cube-container").appendChild( renderer.domElement );
 
   stats = new Stats();
   stats.domElement.style.position = 'absolute';
   stats.domElement.style.top = '0px';
-  document.body.appendChild( stats.domElement );
+  document.getElementById("cube-container").appendChild( stats.domElement );
 
 
   // add the particles
