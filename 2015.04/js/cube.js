@@ -49,9 +49,9 @@ function init() {
   }
   scene.add( group );
 
-  window.addEventListener('mousemove', onMouseMove, false);
-  window.addEventListener('mousedown', onMouseDown, false);
-  window.addEventListener('mouseup', onMouseUp, false);
+  container.addEventListener('mousemove', onMouseMove, false);
+  container.addEventListener('mousedown', onMouseDown, false);
+  container.addEventListener('mouseup', onMouseUp, false);
   window.addEventListener('resize', onWindowResize, false );
 
   console.log(w, h);
