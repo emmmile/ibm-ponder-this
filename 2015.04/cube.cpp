@@ -83,7 +83,7 @@ struct cube {
     size_t index ( const vect& v ) const {
         // XXX any reasonable mapping shold be OK, you can rotate the cube as you want
         vect t = v + vect{D, D, D};
-        int index = t[0] + N * t[1] + N * N * t[2];
+        int index = t[0] + N * t[2] + N * N * t[1];
 
         assert(index >= 0);
         assert(index < int(N * N * N));
