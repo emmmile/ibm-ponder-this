@@ -15,11 +15,14 @@ function webglAvailable() {
 }
 
 function init() {
-  if ( webglAvailable() ) {
+  /*if ( webglAvailable() ) {
     renderer = new THREE.WebGLRenderer({antialias:true});
   } else {
     renderer = new THREE.CanvasRenderer();
-  }
+  }*/
+
+  renderer = new THREE.CanvasRenderer();
+
 
   renderer.setPixelRatio( window.devicePixelRatio );
   scene = new THREE.Scene();
