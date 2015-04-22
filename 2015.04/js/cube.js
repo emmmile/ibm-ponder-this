@@ -1,5 +1,6 @@
 var cube = "WWWWWWWWWWWWWWWPPPPPWWPPPPPWWWWWWWWWPPPPPWWWWWWWWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWWWWWWWWWWWWWWWPPPPPWWPPPPPWWWPPPWWWPPPPPWWPPPPPWWPPPPPWWWWWWWWWPPPPPWWPPPPPWPPPWPPPWPPPPPWWPPPPPWWWWWWWWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWPPPPPWWWWWWWWWWWWWWWWPPPPPWWPPPPPWWPWPWPWWPPPPPWWPPPPPWWPPPPPWWWWWWWWWPPPPPWWWWWWWWWPPPPPWWPPPPPWWWWWWWWWWWWWWW";
 var ratio = 100;
+var container = document.getElementById("cube-container");
 
 // check WebGL availability
 function webglAvailable() {
@@ -21,23 +22,24 @@ function init() {
     renderer = new THREE.CanvasRenderer();
   }*/
 
-  renderer = new THREE.CanvasRenderer();
+  renderer = new THREE.CanvasRenderer({ alpha: true } );
+  renderer.setClearColor(0xffffff, 0.0);
 
 
   renderer.setPixelRatio( window.devicePixelRatio );
   scene = new THREE.Scene();
-  var w = window.innerWidth;
-  var h = window.innerHeight;
+  var w = container.clientWidth; //window.innerWidth;
+  var h = container.clientHeight; //window.innerHeight;
   camera = new THREE.OrthographicCamera( w / -ratio, w / ratio, h / ratio, h / -ratio, 1, 1000 );
   camera.position.z = 10;
 
   renderer.setSize( w, h );
-  document.getElementById("cube-container").appendChild( renderer.domElement );
+  container.appendChild( renderer.domElement );
 
   stats = new Stats();
   stats.domElement.style.position = 'absolute';
   stats.domElement.style.top = '0px';
-  document.getElementById("cube-container").appendChild( stats.domElement );
+  container.appendChild( stats.domElement );
 
 
   // add the particles
@@ -47,10 +49,12 @@ function init() {
   }
   scene.add( group );
 
-  document.addEventListener('mousemove', onMouseMove, false);
-  document.addEventListener('mousedown', onMouseDown, false);
-  document.addEventListener('mouseup', onMouseUp, false);
+  window.addEventListener('mousemove', onMouseMove, false);
+  window.addEventListener('mousedown', onMouseDown, false);
+  window.addEventListener('mouseup', onMouseUp, false);
   window.addEventListener('resize', onWindowResize, false );
+
+  console.log(w, h);
 }
 
 function addPoint(character, index) {
@@ -118,13 +122,18 @@ function onMouseUp(event) {
 function onWindowResize() {
   camera.lookAt(new THREE.Vector3(0,0,0));
 
-  camera.left = window.innerWidth / -ratio;
-  camera.right = window.innerWidth / ratio;
-  camera.top = window.innerHeight / ratio;
-  camera.bottom = window.innerHeight / -ratio;
+
+  var w = container.clientWidth; //window.innerWidth;
+  var h = container.clientHeight; //window.innerHeight;
+
+  camera.left = w / -ratio;
+  camera.right = w / ratio;
+  camera.top = h / ratio;
+  camera.bottom = h / -ratio;
   camera.updateProjectionMatrix();
 
-  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setSize( w, h );
+  console.log(w, h);
 }
 
 function rotateScene(deltaX, deltaY) {
