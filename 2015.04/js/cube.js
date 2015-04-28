@@ -2,6 +2,8 @@ var cube = "WWWWWWWWWWWWWWWPPPPPWWPPPPPWWWWWWWWWPPPPPWWWWWWWWWPPPPPWWPPPPPWWPPPP
 var container = document.getElementById("cube-container");
 var ratio = container.clientWidth / 7;
 
+
+
 // check WebGL availability
 function webglAvailable() {
   try {
@@ -78,8 +80,10 @@ function addPoint(character, index) {
 var render = function () {
   requestAnimationFrame( render );
 
-  group.rotation.x += 0.001;
-  group.rotation.y += 0.001;
+  if ( automaticRotation ) {
+    group.rotation.x += 0.001;
+    group.rotation.y += 0.001;
+  }
 
   renderer.render(scene, camera);
   stats.update();
@@ -88,8 +92,9 @@ var render = function () {
 
 // mouse stuff
 var mouseDown = false,
-  mouseX = 0,
-  mouseY = 0;
+mouseX = 0,
+mouseY = 0;
+automaticRotation = true;
 
 function onMouseMove(event) {
     if (!mouseDown) {
@@ -103,6 +108,7 @@ function onMouseMove(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
     rotateScene(deltaX, deltaY);
+    automaticRotation = false;
 }
 
 function onMouseDown(event) {
@@ -111,12 +117,14 @@ function onMouseDown(event) {
     mouseDown = true;
     mouseX = event.clientX;
     mouseY = event.clientY;
+    automaticRotation = false;
 }
 
 function onMouseUp(event) {
     event.preventDefault();
 
     mouseDown = false;
+    window.setTimeout(function(a){ automaticRotation = true }, 3000);
 }
 
 function onWindowResize() {
