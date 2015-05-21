@@ -28,9 +28,7 @@ union conf {
 };
 
 int simulate ( conf c, int minutes, int limit ) {
-    //cout << c.valid() << " " << minutes << " " << c << endl;
-
-    if ( !c.valid() ) return minutes;
+    if ( ! c.valid() ) return minutes;
     if ( minutes == limit ) return limit;
 
     int x = simulate( conf(c.c[0], c.c[1] * 2, c.c[2] - c.c[1]), minutes + 5, limit );
@@ -48,20 +46,17 @@ int main ( ) {
             for ( int z = y + 1; z <= 255; ++z )
                 all.push_back(conf(x,y,z).aggregate);
 
-    cout << "Starting with " << all.size() << " configurations." << endl;
     for ( int limit = 25; limit < 60; limit += 5) {
+        results.clear();
+
         for ( auto i : all )
             results.push_back( simulate(conf(i), 0, limit) );
 
-        for ( uint i = 0; i < results.size(); ++i ) {
-            //cout << conf(all[i]) << " " << results[i] << endl;
+        for ( uint i = 0; i < results.size(); ++i )
             if ( results[i] < limit )
                 all[i] = 0;
-        }
 
-        results.clear();
         all.erase(remove(all.begin(), all.end(), 0), all.end());
-        cout << "Found " << all.size() << " configurations with limit >= " << limit << endl;
     }
 
     for ( auto i : all ) cout << conf(i) << endl;
