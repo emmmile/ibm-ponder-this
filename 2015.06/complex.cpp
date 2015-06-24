@@ -1,4 +1,5 @@
 #include <numeric>
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <initializer_list>
@@ -154,8 +155,10 @@ int main ( ) {
     points best;
     points current;
 
-    for ( int i = 0; i < 1000000; ++ i) {
-        current = {{-100,0},{100,0},{110,279}};
+    for ( int i = 0; i < 1000000000; ++ i) {
+        current = {{-100,0},{100,0}};
+        //current = {{-100,0},{100,0}};
+
         while ( current.size() != 9 ) {
             // get average and standard deviation of previous measurements
             points::average_t average = current.average();
@@ -176,7 +179,7 @@ int main ( ) {
                     current.add(final);
                     break;
                 } else {
-                    amplitude *= 0.999999;
+                    amplitude *= 0.9999999;
                 }
             }
         }
@@ -184,6 +187,7 @@ int main ( ) {
         if ( current.convex_hull().area() > maximum ) {
             maximum = current.convex_hull().area();
             best = current;
+            cout << maximum << endl;
         }
     }
 
@@ -193,3 +197,11 @@ int main ( ) {
 
     return 0;
 }
+
+// (-100,0), (100,0), (110,279), (-448,22), (-128,-688), (454,-1082), (-1553,-811), (1669,1000), (-1461,2625), 
+// N[ConvexHullArea[{{-100,0}, {100,0}, {110,279}, {-448,22}, {-128,-688}, {454,-1082}, {-1553,-811}, {1669,1000}, {-1461,2625}, }]]
+// 7706009
+
+// (-100,0), (100,0), (110,279), (-225,507), (59,956), (-70,1491), (-1630,168), (2060,445), (243,-2664), 
+// N[ConvexHullArea[{{-100,0}, {100,0}, {110,279}, {-225,507}, {59,956}, {-70,1491}, {-1630,168}, {2060,445}, {243,-2664}, }]]
+// 7709325
