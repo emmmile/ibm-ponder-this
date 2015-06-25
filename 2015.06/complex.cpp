@@ -5,9 +5,14 @@
 #include <initializer_list>
 #include <iostream>
 #include <complex>
+#include <unordered_map>
 #include <random>
 #include <vector>
-using namespace std;    
+using namespace std;
+
+
+unordered_map<int, std::vector<pair<complex<int>, double>>> memo;
+
 
 
 struct points : public array<complex<int>, 10> {
@@ -33,6 +38,10 @@ struct points : public array<complex<int>, 10> {
         (*this)[elements++] = p;
     }
 
+    void remove ( ) {
+        (*this)[--elements] = 0;
+    }
+
     average_t average () const {
         return average(elements);
     }
@@ -40,6 +49,37 @@ struct points : public array<complex<int>, 10> {
     // it needs at least one point
     deviation_t deviation ( ) const {
         return deviation(elements);
+    }
+
+    template<class T>
+    struct deviation_order {
+        bool operator ()(const T &a, const T& b) const {
+            return a.second < b.second;
+        }
+    };
+
+    // generate all the gaussian integers at distance d from (0,0)
+    std::vector<pair<point_t, double>> circle ( double d ) {
+        typedef pair<point_t, double> pp;
+        vector<pp> output;
+
+        for ( double angle = 0; angle <= M_PI / 2; angle += 1 / d ) {
+            output.push_back(pp({int(d * cos(angle)), int(d * sin(angle))}, 0.0));
+            output.push_back(pp({-int(d * cos(angle)), int(d * sin(angle))}, 0.0));
+            output.push_back(pp({int(d * cos(angle)), -int(d * sin(angle))}, 0.0));
+            output.push_back(pp({-int(d * cos(angle)), -int(d * sin(angle))}, 0.0));
+        }
+
+        for ( unsigned int i = 0; i < output.size(); ++i ) {
+            this->add({int(average().real() + output[i].first.real()), 
+                       int(average().imag() + output[i].first.imag())});
+            output[i].second = deviation();
+            this->remove();
+        }
+
+        sort(output.begin(), output.end(), deviation_order<pp>());
+
+        return output;
     }
 
     // 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
@@ -140,31 +180,67 @@ private:
         return sqrt( average / n );
     }
 };
- 
+
+
+unsigned limit = 32;
+points explore ( points start ) {
+    if ( start.size() == 8 ) return start;
+
+    // get average and standard deviation of previous measurements
+    points::average_t average = start.average();
+    points::deviation_t deviation = start.deviation();
+    //cout << start << endl;
+
+    std::vector<pair<complex<int>, double>> circle;
+    if ( memo.count( int(300 * deviation) ) )
+        circle = memo[ int(300 * deviation) ];
+    else {
+        circle = start.circle( 3 * deviation );
+        memo[int(300 * deviation)] = circle;
+    }
+    // for ( auto p : circle ) cout << p.first << " " << p.second << endl;
+
+    int maximum = 0;
+    points best;
+    for ( unsigned int i = 0; i < limit; ++i ) {
+        points::point_t newone(average.real() + circle[i].first.real(),
+                               average.imag() + circle[i].first.imag());
+
+        // cout << newone << endl;
+        start.add(newone);
+        // cout << start << endl;
+        // getchar();
+        points current = explore(start);
+        start.remove();
+
+        if ( current.deviation() > maximum ) {
+            maximum = current.deviation();
+            best = current;
+            // cout << maximum << endl;
+        }
+    }
+
+    return best;
+}
 
 
 
-
-
-int main ( ) {
+points pass ( points start, int stop, points& best ) {
     random_device rd;
     default_random_engine generator(rd());
     uniform_real_distribution<> uniform(0, 1);
 
-    int maximum = 0;
-    points best;
+    int maximum = best.convex_hull().area();
     points current;
 
-    for ( int i = 0; i < 1000000000; ++ i) {
-        current = {{-100,0},{100,0}};
-        //current = {{-100,0},{100,0}};
+    while ( maximum < stop ) {
+        current = start;
 
         while ( current.size() != 9 ) {
             // get average and standard deviation of previous measurements
             points::average_t average = current.average();
             points::deviation_t deviation = current.deviation();
             //cout << current << endl;
-
 
             double phase = uniform(generator) * 2 * M_PI;
             double amplitude = 3 * deviation;
@@ -187,9 +263,29 @@ int main ( ) {
         if ( current.convex_hull().area() > maximum ) {
             maximum = current.convex_hull().area();
             best = current;
-            cout << maximum << endl;
+            cout << maximum << ": " << best << endl;
         }
     }
+
+    return best;
+}
+
+
+
+int main ( ) {
+    points best;
+    points start{{-100,0},{100,0}};
+    cout << "pass 1, starting from " << start << endl;
+    pass(start, 7700000, best); 
+    start.add(best[start.size()]);
+    cout << "pass 2, starting from " << start << endl;
+    pass(start, 7708000, best); 
+    start.add(best[start.size()]);
+    cout << "pass 3, starting from " << start << endl;
+    pass(start, 7716000, best); 
+    start.add(best[start.size()]);
+    cout << "pass 4, starting from " << start << endl;
+    pass(start, 7720000, best); 
 
     cout << best << endl;
     cout << best.mathematica() << endl;
@@ -198,10 +294,12 @@ int main ( ) {
     return 0;
 }
 
-// (-100,0), (100,0), (110,279), (-448,22), (-128,-688), (454,-1082), (-1553,-811), (1669,1000), (-1461,2625), 
-// N[ConvexHullArea[{{-100,0}, {100,0}, {110,279}, {-448,22}, {-128,-688}, {454,-1082}, {-1553,-811}, {1669,1000}, {-1461,2625}, }]]
-// 7706009
-
-// (-100,0), (100,0), (110,279), (-225,507), (59,956), (-70,1491), (-1630,168), (2060,445), (243,-2664), 
-// N[ConvexHullArea[{{-100,0}, {100,0}, {110,279}, {-225,507}, {59,956}, {-70,1491}, {-1630,168}, {2060,445}, {243,-2664}, }]]
-// 7709325
+// 7710906: (-100,0), (100,0), (24,-299), (-12,-589), (326,-915), (-1019,-2), (-448,-1918), (805,1568), (2924,-1340)
+// 7711077: (-100,0), (100,0), (24,-299), (-12,-589), (606,248), (37,1013), (1755,-73), (-1940,-310), (252,-3147)
+// 7712823: (-100,0), (100,0), (24,-299), (-12,-589), (606,248), (37,1013), (-1500,-310), (2189,-87), (360,-3149) 
+// 7715144: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (-979,-63), (64,-1809), (459,1867), (3180,-422) 
+// 7715839: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (1301,-95), (159,-1806), (0,1890), (-2868,-240)
+// 7716371: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (199,-1323), (1794,-89), (-1907,-157), (42,2844)
+// 7716979: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (1304,-184), (70,-1808), (99,1890), (-2869,-108)
+// 7717684: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (1304,-166), (94,-1809), (76,1890), (-2869,-135)
+// 7717442: (-100,0), (100,0), (24,-299), (27,-589), (747,-8), (1304,-184), (94,1452), (67,-2246), (-2870,-205),
