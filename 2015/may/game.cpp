@@ -44,7 +44,7 @@ int main ( ) {
     vector<int> results;
     vector<state> all;
 
-    for ( int x = 175; x <= 255; ++x )
+    for ( int x = 1; x <= 255; ++x )
         for ( int y = x + 1; y <= 255; ++y )
             for ( int z = y + 1; z <= 255; ++z )
                 all.push_back(state(x, y, z));
@@ -60,6 +60,7 @@ int main ( ) {
                 all[i] = state(0, 0, 0);
 
         all.erase(remove(all.begin(), all.end(), state(0, 0, 0)), all.end());
+        cout << limit << " " << all.size() << endl;
     }
 
     for ( auto i : all ) cout << state(i) << endl;
