@@ -52,7 +52,9 @@ void print ( const integer_partition& p ) {
 }
 
 int main ( ) {
-  integer_partition last = {1, 2, 3};
+	cout << verify(integer_partition{2,3,5,8,16}) << endl;
+
+  integer_partition last = {2, 3};
   int M = last.size();
 
   while ( true ) {
