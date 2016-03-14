@@ -6,8 +6,7 @@ import sys
 def reverse(n, digits = 0):
     result = 0
     while digits > 0 or n > 0:
-        result *= 10
-        result += n % 10
+        result = result * 10 + n % 10
         n = n // 10
         digits -= 1
 
