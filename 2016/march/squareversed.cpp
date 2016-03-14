@@ -7,7 +7,7 @@ using namespace std;
 
 // g++ squareversed.cpp -o squarereversed -O3 -std=c++11 -ffast-math -lgmpxx -lgmp -mtune=native -Wall
 
-typedef __uint128_t utype;
+typedef mpz_class utype;
 vector<utype> pows;
 
 ostream& operator<< (ostream& stream, const __uint128_t& x) {
@@ -26,14 +26,14 @@ ostream& operator<< (ostream& stream, const __uint128_t& x) {
 }
 
 
-utype reverse(utype n, int digits ) {
+utype reverse(utype n, int digits = 0) {
     utype result = 0;
     do {
         result *= 10;
         result += n % 10;
         n /= 10;
         digits--;
-    } while( digits );
+    } while( digits > 0 || n > 0 );
 
     return result;
 }
@@ -49,7 +49,7 @@ utype ipow ( utype b, utype e ) {
 }
 
 bool check( utype x, utype y, int digits) {
-    return y % pows[digits] == reverse(x, digits);
+    return y % pows[digits] == reverse(x);
 }
 
 int main ( int argc, char** argv ) {
