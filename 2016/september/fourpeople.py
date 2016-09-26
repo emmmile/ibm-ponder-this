@@ -19,16 +19,11 @@ def violations(seats):
             if ai is bi:
                 count += 1
     return count
-    # return count
-    # count = 0
-    # for a, b in pairwise(seats):
-    #     for ai, bi in zip(a, b):
-    #         if ai is bi:
-    #             count += 1
-    # return count
 
 def seats():
-    return ["".join(s) for s in list(itertools.permutations("abcd"))]
+    return ['abcd', 'abdc', 'acbd', 'acdb', 'adbc', 'adcb', 'bacd', 'badc',
+            'bcad', 'bcda', 'bdac', 'bdca', 'cabd', 'cadb', 'cbad', 'cbda',
+            'cdab', 'cdba', 'dabc', 'dacb', 'dbac', 'dbca', 'dcab', 'dcba']
 
 def pairs():
     return [s for s in itertools.permutations(seats(), 2)]
@@ -45,32 +40,21 @@ if __name__ == "__main__":
         cache[i] = violations(i)
 
     candidates = {(s,): 0 for s in seats()}
-    while True:
+    length = 1
+    while length < 24:
         new_candidates = {}
         for s in candidates.keys():
             for another in seats():
                 if another not in s:
                     newone = s[-2:] + (another,)
-                    new_candidates[newone] = cache[newone] + candidates[s]
+                    if cache[newone] + candidates[s] < 2:
+                        prefix = s[:-2]
+                        new_candidates[prefix + newone] = cache[newone] + candidates[s]
         candidates = new_candidates
-        print(len(new_candidates))
+        length += 1
+        print(length, len(new_candidates))
 
+    for s in candidates.keys():
+        print(candidates[s], s)
 
-
-    # seats = possible_seats()
-    # print(seats)
-    # best = 24 * 4
-    # while True:
-    #     random.shuffle(seats)
-    #     candidate = [seats[0]]
-    #     while len(candidate) < 24:
-    #         minimum = 4
-    #         another = None
-    #         for s in seats:
-    #             if s not in candidate and violations([candidate[-1], s]) < minimum:
-    #                 another = s
-    #         candidate.append(another)
-    #
-    #     if violations(candidate) <= best:
-    #         best = violations(candidate)
-    #         print(violations(candidate), candidate)
+# ('adcb', 'dcba', 'badc', 'cdab', 'abcd', 'dabc', 'bcda', 'cbad', 'adbc', 'bacd', 'dcab', 'abdc', 'cdba', 'bcad', 'dacb', 'cbda', 'acbd', 'bdac', 'dbca', 'acdb', 'cabd', 'dbac', 'bdca', 'cadb')
