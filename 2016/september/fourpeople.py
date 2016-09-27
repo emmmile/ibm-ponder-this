@@ -1,17 +1,8 @@
 #!/usr/bin/python3
 
 import itertools
-import math
-import random
-import sys
 
-def pairwise(iterable):
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
-# given a list of seats give me the number of violations
-# can be even a pair of seats, like ["abcd", "dcba"]
+# how many violations does the last seat add?
 def violations(seats):
     count = 0
     for a, b in itertools.product(seats[:-1], [seats[-1]]):
@@ -21,9 +12,7 @@ def violations(seats):
     return count
 
 def seats():
-    return ['abcd', 'abdc', 'acbd', 'acdb', 'adbc', 'adcb', 'bacd', 'badc',
-            'bcad', 'bcda', 'bdac', 'bdca', 'cabd', 'cadb', 'cbad', 'cbda',
-            'cdab', 'cdba', 'dabc', 'dacb', 'dbac', 'dbca', 'dcab', 'dcba']
+    return [''.join(s) for s in itertools.permutations('ABCD')]
 
 def pairs():
     return [s for s in itertools.permutations(seats(), 2)]
@@ -31,30 +20,28 @@ def pairs():
 def triples():
     return [s for s in itertools.permutations(seats(), 3)]
 
+def loop(candidate, suffixes, cost):
+    if len(candidate) == 24:
+        yield cost, candidate
+    else:
+        for s in seats():
+            if s not in candidate:
+                newone = candidate[-2:] + (s,)
+                newcost = suffixes[newone] + cost
+                if newcost < 1:
+                    for i in loop(candidate + (s,), suffixes, newcost):
+                        yield i
+
 if __name__ == "__main__":
-    # given a pair like ["abcd", "dcba"] or a triple,, how many violations
-    # add the last element?
-    cache = {}
-
+    # given a pair like ['abcd', 'dcba'] or a triple, how many violations
+    # the last element contributes to?
+    suffixes = {}
     for i in pairs() + triples():
-        cache[i] = violations(i)
+        suffixes[i] = violations(i)
 
-    candidates = {(s,): 0 for s in seats()}
-    length = 1
-    while length < 24:
-        new_candidates = {}
-        for s in candidates.keys():
-            for another in seats():
-                if another not in s:
-                    newone = s[-2:] + (another,)
-                    if cache[newone] + candidates[s] < 2:
-                        prefix = s[:-2]
-                        new_candidates[prefix + newone] = cache[newone] + candidates[s]
-        candidates = new_candidates
-        length += 1
-        print(length, len(new_candidates))
+    # chain the generators from every starting seat
+    generator = itertools.chain(*[loop((s,), suffixes, 0) for s in seats()])
 
-    for s in candidates.keys():
-        print(candidates[s], s)
-
-# ('adcb', 'dcba', 'badc', 'cdab', 'abcd', 'dabc', 'bcda', 'cbad', 'adbc', 'bacd', 'dcab', 'abdc', 'cdba', 'bcad', 'dacb', 'cbda', 'acbd', 'bdac', 'dbca', 'acdb', 'cabd', 'dbac', 'bdca', 'cadb')
+    # print the solutions
+    for cost, seat in generator:
+        print(cost, seat)
